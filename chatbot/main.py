@@ -79,8 +79,13 @@ class ResetRequest(BaseModel):
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/")
-async def serve_frontend():
+from fastapi import Request
+from fastapi.responses import Response
+
+@app.api_route("/", methods=["GET", "HEAD"])
+async def serve_frontend(request: Request):
+    if request.method == "HEAD":
+        return Response(status_code=200)
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 
