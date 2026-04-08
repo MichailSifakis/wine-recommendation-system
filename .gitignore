@@ -4,3 +4,4 @@ XWines_Full_21M_ratings (1).csv
 XWines_Full_100K_wines (1).csv
 .env
 .env.example
+.venv
