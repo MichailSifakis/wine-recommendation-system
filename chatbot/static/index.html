@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WINE NOT? — AI Wine Sommelier</title>
+  <meta name="description" content="WINE NOT?: your personal AI wine sommelier. Describe your taste and get personalised wine recommendations powered by content-based filtering and OpenAI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ======================================================
+     SIDEBAR
+====================================================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-text">WINE NOT?</span>
+    </div>
+    <p class="logo-sub">AI Wine Sommelier</p>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-label">Quick Filters</h3>
+    <div class="chip-grid" id="typeChips">
+      <button class="chip" data-type="Red" id="chip-red">Red</button>
+      <button class="chip" data-type="White" id="chip-white">White</button>
+      <button class="chip" data-type="Rosé" id="chip-rose">Rosé</button>
+      <button class="chip" data-type="Sparkling" id="chip-sparkling">Sparkling</button>
+      <button class="chip" data-type="Dessert" id="chip-dessert">Dessert</button>
+      <button class="chip" data-type="Port" id="chip-port">Port</button>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-label">Food Pairings</h3>
+    <div class="chip-grid" id="foodChips">
+      <button class="chip food-chip" data-food="Beef" id="food-beef">Beef</button>
+      <button class="chip food-chip" data-food="Pasta" id="food-pasta">Pasta</button>
+      <button class="chip food-chip" data-food="Cheese" id="food-cheese">Cheese</button>
+      <button class="chip food-chip" data-food="Shellfish" id="food-shellfish">Shellfish</button>
+      <button class="chip food-chip" data-food="Fish" id="food-fish">Fish</button>
+      <button class="chip food-chip" data-food="Pizza" id="food-pizza">Pizza</button>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-label">Body</h3>
+    <div class="chip-grid">
+      <button class="chip body-chip" data-body="Light-bodied" id="body-light">Light</button>
+      <button class="chip body-chip" data-body="Medium-bodied" id="body-medium">Medium</button>
+      <button class="chip body-chip" data-body="Full-bodied" id="body-full">Full</button>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-label">How It Works</h3>
+    <div class="info-card">
+      <p>VinBot uses <strong>content-based filtering</strong> with TF-IDF vectors built from 100K wines.</p>
+      <p>Your preferences are matched to wines using <strong>cosine similarity</strong> across type, grapes, body, acidity, food pairings, and origin.</p>
+    </div>
+  </div>
+
+  <button class="reset-btn" id="resetBtn">🔄 New Conversation</button>
+</aside>
+
+
+<!-- ======================================================
+     MAIN CHAT AREA
+====================================================== -->
+<main class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar">☰</button>
+    <div class="topbar-title">
+      <span class="logo-text-top">WINE NOT?</span>
+    </div>
+    <div class="topbar-links">
+      <a href="#" class="topbar-link">Explore</a>
+    </div>
+  </header>
+
+  <!-- ---- Chat messages ---- -->
+  <div class="chat-window" id="chatWindow">
+
+    <!-- Welcome message -->
+    <div class="message bot-message" id="welcomeMsg">
+      <div class="avatar bot-avatar">🍷</div>
+      <div class="bubble bot-bubble">
+        <h2>WINE NOT?</h2>
+        <p class="subtitle">Your conversational sommelier for thoughtful wine recommendations</p>
+        <p>Tell me about the occasion, what you'll be eating, or a wine style you love — I'll find the perfect match from our database of <strong>100,000 wines</strong>.</p>
+        <p>You can also click the quick-filter chips on the left to get started!</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ---- Wine cards panel ---- -->
+  <div class="cards-panel" id="cardsPanel" style="display:none;">
+    <div class="cards-header">
+      <span class="cards-title">🍾 Recommended Wines</span>
+      <span class="cards-subtitle" id="cardsSubtitle">Based on your preferences</span>
+    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- ---- Input area ---- -->
+  <div class="input-area">
+    <div class="input-row">
+      <textarea
+        id="userInput"
+        class="chat-input"
+        placeholder="Tell me about your taste… e.g. 'I love bold Italian reds with pasta'"
+        rows="1"
+        aria-label="Chat message"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+    <div class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</div>
+  </div>
+
+</main>
+
+
+<!-- ======================================================
+     WINE CARD TEMPLATE (hidden, cloned by JS)
+====================================================== -->
+<template id="wineCardTemplate">
+  <div class="wine-card">
+    <div class="card-type-badge"></div>
+    <h3 class="card-name"></h3>
+    <p class="card-winery"></p>
+    <div class="card-meta">
+      <span class="meta-tag country-tag"></span>
+      <span class="meta-tag body-tag"></span>
+      <span class="meta-tag abv-tag"></span>
+    </div>
+    <div class="card-score">
+      <div class="score-bar-wrap">
+        <div class="score-bar"></div>
+      </div>
+      <span class="score-label"></span>
+    </div>
+    <div class="card-details collapsed">
+      <div class="detail-row">
+        <span class="detail-label">Grapes</span>
+        <span class="detail-value grapes-val"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Pairs with</span>
+        <span class="detail-value food-val"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Acidity</span>
+        <span class="detail-value acidity-val"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Region</span>
+        <span class="detail-value region-val"></span>
+      </div>
+    </div>
+    <button class="card-expand-btn">Show details ▾</button>
+  </div>
+</template>
+
+
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+  <div class="loading-spinner"></div>
+  <p class="loading-text">WINE NOT? is thinking…</p>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
