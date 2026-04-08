@@ -37,7 +37,8 @@ html, body {
 /* ---------- Layout ---------- */
 body {
   display: flex;
-  height: 100vh;
+  height: 100%;
+  height: 100dvh;
 }
 
 /* ==================== SIDEBAR ==================== */
@@ -180,7 +181,7 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100vh;
+  height: 100%;
   background: var(--bg);
 }
 
@@ -298,6 +299,7 @@ body {
   line-height: 1.7;
   font-size: 0.95rem;
   color: var(--text);
+  word-break: break-word;
 }
 
 /* Initial Welcome Bubble specific styles to match the central design */
@@ -705,9 +707,12 @@ body {
 }
 
 @media (max-width: 560px) {
-  .chat-window { padding: 1.2rem; }
-  .message { max-width: 100%; }
-  .input-area { padding: 1rem; }
+  .chat-window { padding: 1rem; }
+  .message { max-width: 100%; gap: 0.6rem; }
+  .bubble { padding: 0.9rem 1rem; font-size: 0.9rem; }
+  .input-area { padding: 0.8rem; }
+  #welcomeMsg h2 { font-size: 2.2rem; }
+  #welcomeMsg .subtitle { font-size: 1rem; }
 }
 
 /* ---- Scrollbar global ---- */
