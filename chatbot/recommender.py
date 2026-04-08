@@ -12,6 +12,9 @@ import re
 import ast
 import numpy as np
 import pandas as pd
+import gdown
+import tempfile
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Optional
@@ -20,6 +23,18 @@ from typing import Optional
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def load_dataframe(path_or_url: str) -> pd.DataFrame:
+    """Helper to load CSV from local path or Google Drive directly."""
+    if "drive.google.com" in path_or_url:
+        print("[Recommender] Detected Google Drive URL. Downloading temporary dataset...")
+        file_id = path_or_url.split("id=")[-1]
+        tmp = tempfile.mktemp(suffix=".csv")
+        gdown.download(id=file_id, output=tmp, quiet=False)
+        df = pd.read_csv(tmp, low_memory=False)
+        os.remove(tmp)
+        return df
+    return pd.read_csv(path_or_url, low_memory=False)
 
 def _safe_parse_list(value: str) -> list[str]:
     """Parse a Python-list-encoded string like "['Beef', 'Pizza']" safely."""
@@ -87,7 +102,7 @@ class ContentBasedRecommender:
 
     def __init__(self, csv_path: str):
         print(f"[Recommender] Loading wine data from {csv_path} …")
-        self.df = pd.read_csv(csv_path, low_memory=False)
+        self.df = load_dataframe(csv_path)
         self._clean()
         self._build_index()
         print(f"[Recommender] Ready — {len(self.df):,} wines indexed.")
