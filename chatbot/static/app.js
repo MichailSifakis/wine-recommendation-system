@@ -118,6 +118,43 @@ resetBtn.addEventListener('click', async () => {
   userInput.style.height = 'auto';
 });
 
+// ── Explore Popular ───────────────────────────────────────
+const explorePopular = document.getElementById('explorePopular');
+if (explorePopular) {
+  explorePopular.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (window.innerWidth <= 860) {
+      sidebar.classList.remove('open');
+    }
+    
+    // Show typing indicator
+    const typingId = addTypingIndicator();
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/popular`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      
+      removeTypingIndicator(typingId);
+      addBotMessage("Here are the most popular wines globally! These are universally loved and a great starting point.");
+      
+      if (data.wines && data.wines.length > 0) {
+        renderWineCards(data.wines);
+        // Track shown IDs
+        data.wines.forEach(w => {
+          if (w.WineID && !shownWineIds.includes(w.WineID)) {
+            shownWineIds.push(w.WineID);
+          }
+        });
+      }
+    } catch (err) {
+      removeTypingIndicator(typingId);
+      addBotMessage("⚠️ Could not load popular wines at the moment.");
+      console.error(err);
+    }
+  });
+}
+
 // ── Main send handler ─────────────────────────────────────
 async function handleSend() {
   const text = userInput.value.trim();
@@ -313,7 +350,7 @@ function renderWineCards(wines) {
   });
 
   cardsPanel.style.display = 'block';
-  cardsSubtitle.textContent = `${wines.length} wine${wines.length !== 1 ? 's' : ''} matched your preferences`;
+  cardsSubtitle.textContent = `Displaying ${wines.length} wine${wines.length !== 1 ? 's' : ''}`;
   cardsPanel.scrollTop = 0;
 }
 

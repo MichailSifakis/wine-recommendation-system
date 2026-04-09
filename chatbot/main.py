@@ -82,6 +82,41 @@ class ResetRequest(BaseModel):
 from fastapi import Request
 from fastapi.responses import Response
 
+@app.get("/api/popular")
+async def get_popular():
+    import json
+    import ast
+    
+    path = Path(__file__).parent.parent / "non_personalised_recommenders" / "saved_models" / "popular" / "popular_global.json"
+    if not path.exists():
+        return {"wines": []}
+        
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        
+    top_ids = data.get("top_wine_ids", [])[:12]
+    
+    def safe_parse_list(val):
+        try:
+            res = ast.literal_eval(val)
+            return [str(x).lower().strip() for x in res] if isinstance(res, list) else []
+        except:
+            return []
+
+    wines = []
+    for wid in top_ids:
+        wine = recommender.get_wine_by_id(wid)
+        if wine:
+            wine["similarity_score"] = 0.99  # Mock high score for UI rendering
+            wine["grapes_parsed"] = safe_parse_list(str(wine.get("Grapes", "")))
+            wine["food_parsed"] = safe_parse_list(str(wine.get("Harmonize", "")))
+            wines.append(wine)
+            
+    return {"wines": wines}
+
+from fastapi import Request
+from fastapi.responses import Response
+
 @app.api_route("/", methods=["GET", "HEAD"])
 async def serve_frontend(request: Request):
     if request.method == "HEAD":
