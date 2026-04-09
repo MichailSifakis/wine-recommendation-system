@@ -173,9 +173,6 @@ if (explorePopular) {
   });
 }
 
-    console.error('[VinBot error]', err);
-  }
-}
 
 // ── Main send handler ─────────────────────────────────────
 async function handleSend() {
